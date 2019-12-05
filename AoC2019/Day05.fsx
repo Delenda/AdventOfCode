@@ -8,7 +8,6 @@ let runProgram given =
         let mode2 = (instruction/1000)%10 
         let a = program.[position + 1]
         let b = program.[position + 2]
-        let c = program.[position + 3]
         let x = if mode1 = 0 then program.[a] else a
         let y = if mode2 = 0 then program.[b] else b
         x,y
