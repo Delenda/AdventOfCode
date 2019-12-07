@@ -59,7 +59,7 @@ let modifyMemory opcode given position (memory:Map<int,int>) =
     match opcode with
     | Add (a,b,c)           -> (getValue a memory) + (getValue b memory) |> setValue c memory
     | Mult(a,b,c)           -> (getValue a memory) * (getValue b memory) |> setValue c memory
-    | Read a                -> setValue a memory given
+    | Read a                -> setValue a memory (given |> List.head)
     | CompareLess (a,b,c)   -> (if getValue a memory < getValue b memory then 1 else 0) |> setValue c memory
     | CompareEqual(a,b,c)   -> (if getValue a memory = getValue b memory then 1 else 0) |> setValue c memory
     | Halt | JumpNull _ | JumpNotNull _ | Write _-> memory
@@ -69,29 +69,45 @@ let modifyOutput opcode (memory:Map<int,int>) output=
     | Write a -> (getValue a memory)::output
     | _ -> output
 
-let programStep (position, memory, output, given) = 
+let modifyInput opcode given = 
+    match opcode with
+    | Read _ -> given |> List.tail
+    | _ -> given
+
+let isRead = function   
+| Read _ -> true
+| _ -> false
+
+
+let programStep (position, memory, output, given)= 
     let opcode = nextOpcode position memory
     if opcode = Halt then
+        None
+    else if isRead opcode && (given |> List.isEmpty) then
         None
     else
         let newMemory = modifyMemory opcode given position memory
         let newOutput = modifyOutput opcode memory output
         let newPosition = nextPosition opcode position memory
-        Some (newOutput, (newPosition, newMemory, newOutput, given))
+        let newGiven =  modifyInput opcode given
+        let newState = (newPosition, newMemory, newOutput, newGiven)
+        Some (newState, newState)
 
-let runProgram (program:string) (given:int)=
-    let memory = 
-        program.Split(',') 
-        |> Array.map int
-        |> Array.indexed
-        |> Map
+let createMemory (program:string) = 
+    program.Split(',') 
+    |> Array.map int 
+    |> Array.indexed 
+    |> Map
 
+let runProgram (program:string) (given:int list)=
+    let memory = createMemory program
     let output = []
     let startPosition = 0
 
-    Seq.unfold programStep (startPosition, memory, output, given)
-    |> Seq.last
-    |> List.head
-
-let part1 = runProgram input 1
-let part2 = runProgram input 5
+    let (_,_,outp,_)= 
+        Seq.unfold programStep (startPosition, memory, output, given)
+        |> Seq.last
+    outp |> List.head
+    
+let part1 = runProgram input [1]
+let part2 = runProgram input [5]
