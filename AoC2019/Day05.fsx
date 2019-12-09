@@ -2,7 +2,7 @@
 
 let runProgram given = 
     let program = input.Split(',') |> Array.map int
-    
+    let memmory = input.Split(',') |> Array.mapi (fun i x -> i, int x)    
     let read2Parameters instruction position = 
         let mode1 = (instruction/100)%10
         let mode2 = (instruction/1000)%10 

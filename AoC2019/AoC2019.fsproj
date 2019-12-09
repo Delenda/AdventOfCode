@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Content Include="packages.config" />
+    <None Include="IntCode.fsx" />
     <None Include="Day01.fsx" />
     <None Include="Day02.fsx" />
     <None Include="Day03.fsx" />
@@ -52,6 +53,8 @@
     <None Include="Day05b.fsx" />
     <None Include="Day06.fsx" />
     <None Include="Day07.fsx" />
+    <None Include="Day08.fsx" />
+    <None Include="Day09.fsx" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
