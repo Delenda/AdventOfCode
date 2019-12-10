@@ -16,9 +16,9 @@ let directions (map: char array array) y x =
         yield (0,-1)
         for a in [0..(map.Length)-1] do
         for b in [0..(map.[0].Length)-1] do
-            if b<>y && x<>a  then 
-                let d = gcd (a-x) (b-y)
-                yield (b-y)/d, (a-x)/d}
+            if y<>a && x<>b  then 
+                let d = gcd (a-y) (b-x)
+                yield (a-y)/d, (b-x)/d}
     |> Seq.distinct
 
 let ray (map: char array array) y x (a,b) = 
