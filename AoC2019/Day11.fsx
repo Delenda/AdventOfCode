@@ -71,13 +71,12 @@ let part2 =
     let maxY = panels |> Seq.map(fun k -> k.Key.y) |> Seq.max
     let minX = panels |> Seq.map(fun k -> k.Key.x) |> Seq.min
     let maxX = panels |> Seq.map(fun k -> k.Key.x) |> Seq.max
-    Seq.init (maxY - minY + 1) (fun i ->
-        Seq.init (maxX - minX + 1) (fun j -> 
-            let p = {x = j + minX; y = i + minY}
-            if panels.ContainsKey p then
-                if panels.[p] = Black then " " else "#"
-            else
-                " ")
-        |> String.concat "")
-    |> Seq.rev
+    seq{for i in [maxY..(-1)..minY] do
+        let line = 
+            seq{for j in [minX..maxX] do
+                match getColor {x = j; y = i} panels with
+                | Black -> yield " "
+                | White -> yield "#"
+                } |> String.concat ""
+        yield line}
     |> Seq.iter(System.Console.WriteLine)    
