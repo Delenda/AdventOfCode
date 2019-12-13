@@ -19,7 +19,7 @@ let rec parse (s:string)=
 
         let initialPart = 
             if idx > 0 then 
-                [{Length = uint64 idx; Repitition = uint64 1; String = s.Substring(0,idx)}] 
+                [{Length = uint64 idx; Repitition = 1UL; String = s.Substring(0,idx)}] 
             else 
                 []
 
@@ -28,7 +28,7 @@ let rec parse (s:string)=
 
         let remainingPart = 
             if idx + compressDescription.Length + length < s.Length then 
-                parse (s.Substring(idx + compressDescription.Length + length)) 
+                s.Substring(idx + compressDescription.Length + length) |> parse
             else 
                 []
 
@@ -49,7 +49,4 @@ let rec size comp =
     else
         comp.Length * comp.Repitition
 
-let part2 = 
-    input
-    |> parse
-    |> List.sumBy size
+let part2 = size { Length = uint64 1; Repitition = uint64 1; String = input}
