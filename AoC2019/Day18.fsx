@@ -1,4 +1,5 @@
 ﻿let input = System.IO.File.ReadAllLines(__SOURCE_DIRECTORY__ +   @"\Input\Day18.txt")
+let input2 = System.IO.File.ReadAllLines(__SOURCE_DIRECTORY__ +   @"\Input\Day18b.txt")
 
 let cells = input |> Array.map(fun s -> s.ToCharArray())
 
@@ -152,3 +153,34 @@ let test5 =
 seek test5
 
 let part1 = seek cells
+
+let subGraph1 = 
+    input2 |> Array.map(fun s -> s.ToCharArray())
+    |> Array.take 41
+    |> Array.map(Array.take 41)
+
+let subGraph2 = 
+    input2 |> Array.map(fun s -> s.ToCharArray())
+    |> Array.skip 40
+    |> Array.map(Array.take 41)
+
+let subGraph3 = 
+    input2 |> Array.map(fun s -> s.ToCharArray())
+    |> Array.take 41
+    |> Array.map(Array.skip 40)
+
+let subGraph4 = 
+    input2 |> Array.map(fun s -> s.ToCharArray())
+    |> Array.skip 40
+    |> Array.map(Array.skip 40)
+
+let seekSubGraph dots = 
+    let newDots = dots |> Array.map(fun row -> row |> Array.map(fun c -> if c = '@' then '.' else c))
+    let lp = letterPosition newDots
+    let openDoors = Set ['a'..'z'] |> Set.filter(lp.ContainsKey >> not) |> Set.map(fun ch -> int ch - 32 |> char)
+    let entrance = dots |> Array.mapi(fun i row -> row |> Array.mapi(fun j c -> if c <> '@' then None else Some {pos = {x=j;y=i}; letter = '.'; openDoors = openDoors})) |> Array.collect id |> Array.choose id |> Array.exactlyOne
+    let c,d,p = Seq.unfold (dijkstra newDots lp)([entrance] |> Set, [entrance,0] |> Map, Map.empty) |> Seq.last
+    d |> Map.filter(fun k t -> k.openDoors.Count = openDoors.Count + lp.Count) |> Seq.map(fun kvp -> kvp.Value) |> Seq.min
+
+let part2 = 
+    [subGraph1; subGraph2; subGraph3; subGraph4] |> List.sumBy seekSubGraph
