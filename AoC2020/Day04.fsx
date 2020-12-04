@@ -1,4 +1,6 @@
-﻿let input = System.IO.File.ReadAllLines(__SOURCE_DIRECTORY__ + @"\Input\Day04.txt")
+﻿open System.Text.RegularExpressions
+
+let input = System.IO.File.ReadAllLines(__SOURCE_DIRECTORY__ + @"\Input\Day04.txt")
 
 type passport =
     {
@@ -11,6 +13,30 @@ type passport =
         ExpirationYear : int
         HairColor : string
     }
+    member this.Valid = 
+        if this.BirthYear > 2002 || this.BirthYear < 1920 then false else
+        if this.IssueYear < 2010 || this.IssueYear > 2020 then false else
+        if this.ExpirationYear < 2020 || this.ExpirationYear > 2030 then false else
+        if Regex.Match(this.Height, @"\d+[in|cm]").Success |> not then false else
+        let ht = int(this.Height.Replace("cm","").Replace("in",""))
+        if this.Height.EndsWith "cm" && (ht < 150 || ht > 193) then false else
+        if this.Height.EndsWith "in" && (ht < 59 || ht > 76) then false else
+        if (this.Height.EndsWith "in" || this.Height.EndsWith "cm") |> not then false else
+        if Regex.Match(this.HairColor, @"#[\d|a-f]{6}$").Success |> not then false else
+        if Regex.Match(this.EyeColor, @"[amb|blu|brn|gry|grn|hzl|oth]$").Success |> not then false else
+        if Regex.Match(this.PassportId, @"^\d{9}$").Success |> not then false else
+        true
+    override this.ToString() =
+            [
+                sprintf "Birthyear:............%d" this.BirthYear
+                sprintf "IssueYear:............%d" this.IssueYear
+                sprintf "ExpirationYear:.......%d" this.ExpirationYear
+                sprintf "Height:...............%s" this.Height
+                sprintf "HairColor:............%s" this.HairColor
+                sprintf "EyeColor:.............%s" this.EyeColor
+                sprintf "PassportId:...........%s" this.PassportId
+                sprintf "Valid:................%O" this.Valid
+            ] |> String.concat "\r\n"
 
 let parse str =
     let pattern = @"(ecl|pid|iyr|hcl|byr|hgt|eyr|cid):(\S+)"
@@ -46,22 +72,6 @@ let passports =
         |> fun (a,b) -> b::a
     |> List.map parse
 
-open System.Text.RegularExpressions
-
-let validation pp =
-    if pp.BirthYear > 2002 || pp.BirthYear < 1920 then false else
-    if pp.IssueYear < 2010 || pp.IssueYear > 2020 then false else
-    if pp.ExpirationYear < 2020 || pp.ExpirationYear > 2030 then false else
-    if Regex.Match(pp.Height, @"\d+[in|cm]").Success |> not then false else
-    let ht = int(pp.Height.Replace("cm","").Replace("in",""))
-    if pp.Height.EndsWith "cm" && (ht < 150 || ht > 193) then false else
-    if pp.Height.EndsWith "in" && (ht < 59 || ht > 76) then false else
-    if (pp.Height.EndsWith "in" || pp.Height.EndsWith "cm") |> not then false else
-    if Regex.Match(pp.HairColor, @"#[\d|a-f]{6}$").Success |> not then false else
-    if Regex.Match(pp.EyeColor, @"[amb|blu|brn|gry|grn|hzl|oth]$").Success |> not then false else
-    if Regex.Match(pp.PassportId, @"\d{9}$").Success |> not then false else
-    true
-
 let part1 =
     passports
     |> List.filter(fun p -> p.IsSome)
@@ -70,5 +80,5 @@ let part1 =
 let part2 =
     passports
     |> List.filter(fun p -> p.IsSome)
-    |> List.filter (Option.map validation >> Option.defaultValue false >> not)
+    |> List.filter (Option.map (fun pp -> pp.Valid) >> Option.defaultValue false)
     |> List.length
