@@ -1,17 +1,15 @@
-﻿let input = System.IO.File.ReadAllLines(__SOURCE_DIRECTORY__ + @"\Input\Day06.txt")
+﻿let input = System.IO.File.ReadAllText(__SOURCE_DIRECTORY__ + @"\Input\Day06.txt")
 
 let answers = 
-    input
-        |> Array.fold(fun s t ->
-            if t = "" then ((snd s)::fst s, "") else (fst s , (snd s) + " " + t)
-            ) ([], "")
-        |> fun (a,b) -> b::a
+    let split p s = System.Text.RegularExpressions.Regex.Split(s,p)
+    split @"\r\n\r\n" input
+    |> Seq.map(split @"\r\n")
+    |> Seq.map (Seq.map Set)
 
 let count setfunction = 
     answers
-    |> Seq.map(fun s -> 
-        s.Trim().Split(' ') |> Array.map Set |> setfunction |> Set.count)
-    |> Seq.sum
+    |> Seq.map setfunction 
+    |> Seq.sumBy Seq.length
 
 let part1 = count Set.unionMany
 let part2 = count Set.intersectMany

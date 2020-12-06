@@ -1,6 +1,6 @@
 ﻿open System.Text.RegularExpressions
 
-let input = System.IO.File.ReadAllLines(__SOURCE_DIRECTORY__ + @"\Input\Day04.txt")
+let input = System.IO.File.ReadAllText(__SOURCE_DIRECTORY__ + @"\Input\Day04.txt")
 
 type passport =
     {
@@ -65,20 +65,16 @@ let parse str =
     | _ -> None
 
 let passports =
-    input
-        |> Array.fold(fun s t ->
-            if t = "" then ((snd s)::fst s, "") else (fst s , (snd s) + " " + t)
-            ) ([], "")
-        |> fun (a,b) -> b::a
-    |> List.map parse
+    Regex.Split(input, @"\r\n\r\n")
+    |> Seq.map parse
 
 let part1 =
     passports
-    |> List.filter(fun p -> p.IsSome)
-    |> List.length
+    |> Seq.filter(fun p -> p.IsSome)
+    |> Seq.length
 
 let part2 =
     passports
-    |> List.filter(fun p -> p.IsSome)
-    |> List.filter (Option.map (fun pp -> pp.Valid) >> Option.defaultValue false)
-    |> List.length
+    |> Seq.filter(fun p -> p.IsSome)
+    |> Seq.filter (Option.map (fun pp -> pp.Valid) >> Option.defaultValue false)
+    |> Seq.length
