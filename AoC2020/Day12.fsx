@@ -11,7 +11,7 @@ type instruction =
     | Move_South of int
     | Move_East of int
     | Move_West of int
-    | Turn of int
+    | Clockwise_Turn of int
     | Forward of int
 
 let turn direction degree = 
@@ -48,48 +48,43 @@ let parse txt =
              | "S" -> Move_South value
              | "E" -> Move_East value
              | "W" -> Move_West value
-             | "L" -> Turn (360-value)
-             | "R" -> Turn value
+             | "L" -> Clockwise_Turn (360-value)
+             | "R" -> Clockwise_Turn value
              | "F" -> Forward value
              | _ -> failwith (sprintf "Unexpected instruction: %s " instr)}
 
 type state = {X: int; Y : int; Direction : direction; Waypoint_X : int; Waypoint_Y : int }    
 
-let rec move state instruction = 
+let rec move_ship state instruction = 
     match instruction with
     | Move_North steps -> {state with Y = state.Y + steps}
     | Move_South steps -> {state with Y = state.Y - steps}
     | Move_East steps -> {state with X = state.X + steps}
     | Move_West steps -> {state with X = state.X - steps}
-    | Turn deg -> {state with Direction = turn state.Direction deg}
+    | Clockwise_Turn deg -> {state with Direction = turn state.Direction deg}
     | Forward steps ->
         match state.Direction with
-        | North -> move state (Move_North steps) 
-        | South -> move state (Move_South steps) 
-        | West -> move state (Move_West steps) 
-        | East -> move state (Move_East steps) 
+        | North -> move_ship state (Move_North steps) 
+        | South -> move_ship state (Move_South steps) 
+        | West -> move_ship state (Move_West steps) 
+        | East -> move_ship state (Move_East steps) 
 
-let rec move2 state instruction = 
+let rec move_waypoint state instruction = 
     match instruction with
     | Move_North steps -> {state with Waypoint_Y = state.Waypoint_Y + steps}
     | Move_South steps -> {state with Waypoint_Y = state.Waypoint_Y - steps}
     | Move_East steps -> {state with Waypoint_X = state.Waypoint_X + steps}
     | Move_West steps -> {state with Waypoint_X = state.Waypoint_X - steps}
-    | Turn deg -> 
+    | Clockwise_Turn deg -> 
         let newWaypoint = turn_waypoint (state.Waypoint_X, state.Waypoint_Y) deg
         {state with Waypoint_X = fst newWaypoint; Waypoint_Y = snd newWaypoint}
     | Forward steps -> {state with X = state.X + steps* state.Waypoint_X; Y = state.Y + steps * state.Waypoint_Y}
         
-let initialState = {X = 0; Y = 0; Direction = East; Waypoint_X = 10; Waypoint_Y = 1}
-
-let part1 = 
+let navigate movement = 
     input
     |> parse
-    |> Seq.fold move initialState
+    |> Seq.fold movement {X = 0; Y = 0; Direction = East; Waypoint_X = 10; Waypoint_Y = 1}
     |> fun s -> abs(s.X) + abs(s.Y)
 
-let part2 = 
-    input
-    |> parse
-    |> Seq.fold move2 initialState
-    |> fun s -> abs(s.X) + abs(s.Y)
+let part1 = navigate move_ship
+let part2 = navigate move_waypoint
