@@ -152,7 +152,6 @@ let part2 =
     Seq.unfold(fun s -> 
         if countSeamonsters s = 0 then None else
         let newS= scanned s
-        Some(newS, newS)
+        Some(roughness newS, newS)
         ) transform
     |> Seq.last
-print part2
