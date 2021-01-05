@@ -59,6 +59,7 @@
     <None Include="Day12.fsx" />
     <None Include="Day13.fsx" />
     <None Include="Day14.fsx" />
+    <None Include="Day15.fsx" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
