@@ -10,6 +10,7 @@ type opcode =
     | Dec of value
     | Jnz of value*value
     | Tgl of value
+    | Out of value
 
 let parse_register (term:string) =
     match term with
@@ -35,6 +36,7 @@ let parse (line:string) =
     | "dec" -> Dec (parse_register terms.[1] |> Register)
     | "jnz" -> Jnz (parse_value terms.[1], parse_value terms.[2])
     | "tgl" -> Tgl (parse_value terms.[1])
+    | "out" -> Out (parse_value terms.[1])
     | _ -> failwith ("Unexpected code: " + line)
 
 type state = {Pointer: int64 ; Register :Map<register,int64>; Program : Map<int64, opcode>}
@@ -50,6 +52,7 @@ let toggle = function
     | Dec r -> Inc r
     | Jnz(v,offset) -> Cpy(v, offset)
     | Tgl v -> Inc v
+    | Out v -> Inc v
     
 let isRegister = function
     | Litteral _ -> false
@@ -61,6 +64,7 @@ let canExecute = function
     | Dec r -> isRegister r
     | Jnz(v,offset) -> true
     | Tgl v -> true
+    | Out v -> true
 
 let register = function
     | Register x -> x
@@ -84,6 +88,9 @@ let run (program:opcode array) (reg, regvalue) =
                         state.Register, 1L, state.Program
                     else
                         state.Register, 1L, state.Program.Add(state.Pointer + eval state.Register v, toggle state.Program.[state.Pointer + eval state.Register v])
+                | Out v -> 
+                    System.Console.WriteLine (eval state.Register v)
+                    state.Register, 1L, state.Program
             else
                 state.Register, 1L, state.Program
                 
